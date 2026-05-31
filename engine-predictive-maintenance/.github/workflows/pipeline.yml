@@ -1,0 +1,82 @@
+
+name: Engine Predictive Maintenance Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  data-registration:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install -r engine-predictive-maintenance/requirements.txt
+
+      - name: Register Dataset
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python engine-predictive-maintenance/model_building/data_register.py
+
+  data-preparation:
+
+    needs: data-registration
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install -r engine-predictive-maintenance/requirements.txt
+
+      - name: Run Data Preparation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python engine-predictive-maintenance/model_building/prep.py
+
+  model-training:
+
+    needs: data-preparation
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install -r engine-predictive-maintenance/requirements.txt
+
+      - name: Train Models
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python engine-predictive-maintenance/model_building/train.py
+
+  deploy-hosting:
+
+    needs:
+      - data-registration
+      - data-preparation
+      - model-training
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install -r engine-predictive-maintenance/requirements.txt
+
+      - name: Deploy to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python engine-predictive-maintenance/hosting/hosting.py

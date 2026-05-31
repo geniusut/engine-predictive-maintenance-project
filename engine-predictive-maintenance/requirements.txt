@@ -1,0 +1,12 @@
+
+huggingface_hub
+datasets
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+xgboost
+mlflow
+joblib
+streamlit
